@@ -45,8 +45,7 @@ if __name__ == '__main__':
     import time
     import datetime
 
-
-    # Prepare telegram bot
+    # Prepare telegram #bot
 
     bot = telegram.Bot("190532917:AAFrPtubUkFoau6AilY9Uhj7bk-YiQtYpdA")
     chat_id = 12934778
@@ -68,43 +67,55 @@ if __name__ == '__main__':
     last_location = None
     last_day = datetime.datetime.now().day
     timer_start = timer()
+    already_notified = False
+    last_notified_at = None
 
-    for frame in camera.motion_detector_steamer():
+    for frame in camera.motion_detector_steamer(view_stream = True):
 
         room_position = room_location(frame.detection_center)
-        # If there is detection
-        if room_position is not None:
 
-            x,y = frame.detection_center
-            tracking_positions_x.append( x )
-            tracking_positions_x.append( y )
+        # If we are in the same location
+        if room_position is None or room_position == last_location:
 
-            # If tracking object is in new position with more than 10 seconds (to avoid a lot of noise)
-            if room_position != last_location:
+            time_in_location = timer()-timer_start
 
+            # Add coordinates to list
+            if room_position is not None:
+                x,y = frame.detection_center
+                tracking_positions_x.append( x )
+                tracking_positions_x.append( y )
 
+            # Send image
+            if last_location != last_notified_at and not already_notified and time_in_location > 10:
                 #Send the image
                 bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_location))
-                bot.sendPhoto(chat_id=chat_id,photo = serialize_image(frame.raw_image),caption=room_position)
+                bot.sendPhoto(chat_id=chat_id, photo = serialize_image(frame.raw_image),caption=last_location)
+                last_notified_at = last_location
+                already_notified = True
 
-                # Add time to the time tracker and update last_location
-                positions_timer[last_location] += time_in_location
-                last_location = room_position
-
-                # Reset timer
-                timer_start = timer()
-                time_in_location = 0
-
-            # We are here if there is detection but in the same place as before
-            else:
-                time_in_location = timer()-timer_start
-        # If there is no detection we asume that the tracking object is in the same position as before
+        # If we have changed location
         else:
-            time_in_location = timer()-timer_start
+
+            # Add coordinates to list
+            if room_position is not None:
+                x,y = frame.detection_center
+                tracking_positions_x.append( x )
+                tracking_positions_x.append( y )
+
+            # We are not already notified of this change
+
+            already_notified = False
+
+            # Add time to the time tracker and update last_location
+            positions_timer[last_location] += time_in_location
+            last_location = room_position
+
+            # Reset timer
+            timer_start = timer()
+            time_in_location = 0
 
 
         # Send stats if 12 AM
-
         current_day =datetime.datetime.now().day
 
 
