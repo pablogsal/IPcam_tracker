@@ -25,7 +25,7 @@ def room_location( center ):
 
     x,y = center
 
-    if 457<= x <= 584 and 90<= y <= 207:
+    if 457<= x <= 584 and 90<= y <= 227:
         return "Casa circular"
     elif 100<= x <=238 and 0<= y <= 95:
         return "Hamburguesa"
@@ -88,7 +88,7 @@ if __name__ == '__main__':
             # Send image
             if last_location != last_notified_at and not already_notified and time_in_location > 10:
                 #Send the image
-                bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_location))
+                bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_notified_at))
                 bot.sendPhoto(chat_id=chat_id, photo = serialize_image(frame.raw_image),caption=last_location)
                 last_notified_at = last_location
                 already_notified = True
