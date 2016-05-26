@@ -171,15 +171,17 @@ class IPCam():
             if x_means and y_means:
                 last_frame = raw_frame
                 yield Image(last_frame,(np.mean(x_means),np.mean(y_means)),timestamp)
+
+                # Add circle if view_stream is True
+                if view_stream:
+                    cv2.circle(frame, (int(np.mean(x_means)),int(np.mean(y_means))),15, (0, 255, 0))
             else:
                 yield Image(last_frame,None,timestamp)
-
             if debug:
                 print("Frame computed in {} seconds".format(timer() - start_timer))
 
 
-            if view_stream and x_means and y_means:
-                cv2.circle(frame, (int(np.mean(x_means)),int(np.mean(y_means))),15, (0, 255, 0))
+            if view_stream:
                 cv2.imshow("Feed",frame)
                 key = cv2.waitKey(1) & 0xFF
                 # if the `q` key is pressed, break from the lop

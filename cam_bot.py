@@ -1,9 +1,9 @@
 import io
 import numpy as np
-
+import matplotlib.pyplot as plt
 def serialize_image( image ):
 
-    return io.BufferedReader(io.BytesIO(frame))
+    return io.BufferedReader(io.BytesIO(image))
 
 def make_heat_map( x_list, y_list):
 
@@ -67,35 +67,41 @@ if __name__ == '__main__':
     time_in_location = 0
     last_location = None
     last_day = datetime.datetime.now().day
+    timer_start = timer()
 
-    for frame in camera.motion_detector_steamer():
+    for frame in camera.motion_detector_steamer(view_stream = True):
 
-        timer_start = timer()
         room_position = room_location(frame.detection_center)
-        print(room_position)
+        print(room_position,time_in_location,last_location)
         # If there is detection
-        if room_position:
+        if room_position is not None:
 
             x,y = frame.detection_center
             tracking_positions_x.append( x )
             tracking_positions_x.append( y )
 
             # If tracking object is in new position with more than 10 seconds (to avoid a lot of noise)
-            if room_position != last_location and time_in_location > 10:
+            if room_position != last_location:
 
 
                 # If we have image, send the image
-                if frame.raw_image is not None:
+                if frame.raw_image is not None and time_in_location > 10:
                     bot.sendPhoto(chat_id=chat_id,photo = serialize_image(frame.raw_image),caption="I have spend {} seconds in {}".format(time_in_location,last_location))
 
                 # Add time to the time tracker and update last_location
                 positions_timer[room_position] += time_in_location
                 last_location = room_position
+
+                # Reset timer
+                timer_start = timer()
                 time_in_location = 0
 
+            # We are here if there is detection but in the same place as before
+            else:
+                time_in_location = timer()-timer_start
         # If there is no detection we asume that the tracking object is in the same position as before
         else:
-            time_in_location += timer()-timer_start
+            time_in_location = timer()-timer_start
 
 
         # Send stats if 12 AM
