@@ -1,7 +1,5 @@
 import io
 import numpy as np
-import numpy.random
-import matplotlib.pyplot as plt
 
 def serialize_image( image ):
 
@@ -55,7 +53,7 @@ if __name__ == '__main__':
 
     # Prepare camera
 
-    camera = ip_cam.IPCam('192.168.1.131')
+    camera = ip_cam.IPCam('192.168.1.131',debug=True)
 
     # Prepare arrays for stats
 
@@ -74,7 +72,7 @@ if __name__ == '__main__':
 
         timer_start = timer()
         room_position = room_location(frame.detection_center)
-
+        print(room_position)
         # If there is detection
         if room_position:
 
