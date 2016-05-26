@@ -85,7 +85,8 @@ if __name__ == '__main__':
 
                 # If we have image, send the image
                 if frame.raw_image is not None and time_in_location > 10:
-                    bot.sendPhoto(chat_id=chat_id,photo = serialize_image(frame.raw_image),caption="I have spend {} seconds in {}".format(time_in_location,last_location))
+                    bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_location))
+                    bot.sendPhoto(chat_id=chat_id,photo = serialize_image(frame.raw_image),caption=room_position)
 
                 # Add time to the time tracker and update last_location
                 positions_timer[room_position] += time_in_location
@@ -115,7 +116,7 @@ if __name__ == '__main__':
             bot.sendMessage(chat_id=chat_id, text=str(positions_timer))
 
             # Send heat map
-            with open('./heat_map.png') as heat_map:
+            with open('./heat_map.png','r') as heat_map:
                 bot.sendPhoto(chat_id=chat_id,photo = heat_map)
 
             # Reset stats
