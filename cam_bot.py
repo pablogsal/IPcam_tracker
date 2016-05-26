@@ -83,10 +83,9 @@ if __name__ == '__main__':
             if room_position != last_location:
 
 
-                # If we have image, send the image
-                if frame.raw_image is not None:
-                    bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_location))
-                    bot.sendPhoto(chat_id=chat_id,photo = serialize_image(frame.raw_image),caption=room_position)
+                #Send the image
+                bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_location))
+                bot.sendPhoto(chat_id=chat_id,photo = serialize_image(frame.raw_image),caption=room_position)
 
                 # Add time to the time tracker and update last_location
                 positions_timer[last_location] += time_in_location
