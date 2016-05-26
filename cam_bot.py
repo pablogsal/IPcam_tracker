@@ -69,7 +69,7 @@ if __name__ == '__main__':
     last_day = datetime.datetime.now().day
     timer_start = timer()
 
-    for frame in camera.motion_detector_steamer(view_stream = True):
+    for frame in camera.motion_detector_steamer():
 
         room_position = room_location(frame.detection_center)
         # If there is detection
@@ -84,12 +84,12 @@ if __name__ == '__main__':
 
 
                 # If we have image, send the image
-                if frame.raw_image is not None and time_in_location > 10:
+                if frame.raw_image is not None:
                     bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_location))
                     bot.sendPhoto(chat_id=chat_id,photo = serialize_image(frame.raw_image),caption=room_position)
 
                 # Add time to the time tracker and update last_location
-                positions_timer[room_position] += time_in_location
+                positions_timer[last_location] += time_in_location
                 last_location = room_position
 
                 # Reset timer
