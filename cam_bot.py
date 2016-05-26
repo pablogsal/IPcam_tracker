@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     # Prepare camera
 
-    camera = ip_cam.IPCam('192.168.1.131',debug=True)
+    camera = ip_cam.IPCam('192.168.1.131',debug=False)
 
     # Prepare arrays for stats
 
@@ -72,7 +72,6 @@ if __name__ == '__main__':
     for frame in camera.motion_detector_steamer(view_stream = True):
 
         room_position = room_location(frame.detection_center)
-        print(room_position,time_in_location,last_location)
         # If there is detection
         if room_position is not None:
 
