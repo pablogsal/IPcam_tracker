@@ -83,7 +83,7 @@ if __name__ == '__main__':
             if room_position is not None:
                 x,y = frame.detection_center
                 tracking_positions_x.append( x )
-                tracking_positions_x.append( y )
+                tracking_positions_y.append( y )
 
             # Send image
             if last_location != last_notified_at and not already_notified and time_in_location > 10:
@@ -100,7 +100,7 @@ if __name__ == '__main__':
             if room_position is not None:
                 x,y = frame.detection_center
                 tracking_positions_x.append( x )
-                tracking_positions_x.append( y )
+                tracking_positions_y.append( y )
 
             # We are not already notified of this change
 
@@ -126,6 +126,7 @@ if __name__ == '__main__':
             bot.sendMessage(chat_id=chat_id, text=str(positions_timer))
 
             # Send heat map
+            make_heat_map(tracking_positions_x,tracking_positions_y)
             with open('./heat_map.png','r') as heat_map:
                 bot.sendPhoto(chat_id=chat_id,photo = heat_map)
 
