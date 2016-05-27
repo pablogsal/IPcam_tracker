@@ -106,13 +106,15 @@ if __name__ == '__main__':
         room_position = room_location(frame.detection_center)
 
         logger.debug('Room position: {}'.format(room_position))
+        logger.debug('Timestamp of frame: {}'.format(frame.timestamp))
 
         # If we are in the same location
         if room_position is None or room_position == last_location:
 
 
             logger.debug('No detection or in same location')
-
+            logger.debug('Last seen at: {}'.format(last_location))
+            logger.debug('Time in location: {}'.format(time_in_location))
             time_in_location = timer()-timer_start
 
             # Add coordinates to list

@@ -3,6 +3,7 @@ import cv2
 import collections
 import datetime
 import time
+import itertools
 
 Image = collections.namedtuple("Image","raw_image detection_center timestamp")
 
@@ -67,27 +68,48 @@ class IPCam():
         raw_byte_stream =  self.opener.open('http://192.168.1.131/video/mjpg.cgi')
 
         # Extract frames from raw_video_stream
-
+        count = itertools.count()
+        fails = next(count)
         if PYTHON2:
             byte_stream=''
             while True:
-                byte_stream+=raw_byte_stream.read(1024)
+                byte_stream+=raw_byte_stream.read(16384)
+                if self.debug:
+                    print('Frame recieved. Start Transformation')
                 a = byte_stream.find('\xff\xd8')
                 b = byte_stream.find('\xff\xd9')
+
+                print(a,b)
+
+                if fails > 10:
+                    raise ValueError('10 fails locating b')
+
                 if a!=-1 and b!=-1:
                     raw_image = byte_stream[a:b+2]
                     byte_stream= byte_stream[b+2:]
                     yield raw_image
+                else:
+                    fails = next(count)
         else:
             byte_stream = bytes()
             while True:
-                byte_stream+=raw_byte_stream.read(1024)
+                byte_stream+=raw_byte_stream.read(16384)
+                if self.debug:
+                    print('Frame recieved. Start Transformation')
                 a = byte_stream.find(b'\xff\xd8')
                 b = byte_stream.find(b'\xff\xd9')
+
+                print(a,b)
+
+                if fails > 10:
+                    raise ValueError('10 fails locating b')
+
                 if a!=-1 and b!=-1:
                     raw_image = byte_stream[a:b+2]
                     byte_stream= byte_stream[b+2:]
                     yield raw_image
+                else:
+                    fails = next(count)
 
     def video_stream(self,mixed = False):
         """
@@ -128,6 +150,8 @@ class IPCam():
 
             start_timer = timer()
 
+            if self.debug:
+                print('Start Computation')
             # Get timestamp
 
             timestamp = datetime.datetime.now()
@@ -159,6 +183,9 @@ class IPCam():
 
             x_means = []
             y_means = []
+
+            if self.debug:
+                print('Detecting contours')
 
             for contour in contours:
                 # Ignore small contours
