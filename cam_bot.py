@@ -44,15 +44,44 @@ if __name__ == '__main__':
     import collections
     import time
     import datetime
+    import configparser
+    import os
+    import logging
+
+    # Read from the config file
+
+    config_parser = configparser.ConfigParser()
+    config_parser.read( os.path.dirname( os.path.realpath(__file__)) + '/conf.INI')
+
+    ip = config_parser.get('MAIN', "IP")
+    user = config_parser.get('MAIN', "User")
+    password = config_parser.get('MAIN', "Password")
+    bot_token = config_parser.get('MAIN','Bot_token')
+    chat_id = int(config_parser.get('MAIN','Chat_id'))
+
+    time_between_updates = int(config_parser.get('PARAMETERS', "Time_between_updates"))
+    max_detection_area = int(config_parser.get('PARAMETERS', "Max_detection_area"))
+    threshold = int(config_parser.get('PARAMETERS','Threshold'))
+
+    # Prepare the log
+
+    logger = logging.getLogger('CAM_BOT')
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(fh)
+    logger.addHandler(ch)
 
     # Prepare telegram #bot
 
-    bot = telegram.Bot("190532917:AAFrPtubUkFoau6AilY9Uhj7bk-YiQtYpdA")
-    chat_id = 12934778
+    bot = telegram.Bot(bot_token)
 
     # Prepare camera
 
-    camera = ip_cam.IPCam('192.168.1.131',debug=False)
+    camera = ip_cam.IPCam(ip,user=user,password=password,
+                          threshold = threshold,max_detection_area=max_detection_area)
 
     # Prepare arrays for stats
 
@@ -61,6 +90,9 @@ if __name__ == '__main__':
     positions_timer = collections.Counter()
 
     # Main loop: Procesing frames
+
+    logger.info('Starting main loop')
+
 
     timer = time.time
     time_in_location = 0
@@ -74,8 +106,13 @@ if __name__ == '__main__':
 
         room_position = room_location(frame.detection_center)
 
+        logger.debug('Room position: {}'.format(room_position))
+
         # If we are in the same location
         if room_position is None or room_position == last_location:
+
+
+            logger.debug('No detection or in same location')
 
             time_in_location = timer()-timer_start
 
@@ -87,6 +124,7 @@ if __name__ == '__main__':
 
             # Send image
             if last_location != last_notified_at and not already_notified and time_in_location > 10:
+                logger.info('Sending image with Telegram bot')
                 #Send the image
                 bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_notified_at))
                 bot.sendPhoto(chat_id=chat_id, photo = serialize_image(frame.raw_image),caption=last_location)
@@ -96,11 +134,12 @@ if __name__ == '__main__':
         # If we have changed location
         else:
 
+            logger.info('New location: {}'.format(room_position))
+
             # Add coordinates to list
-            if room_position is not None:
-                x,y = frame.detection_center
-                tracking_positions_x.append( x )
-                tracking_positions_y.append( y )
+            x,y = frame.detection_center
+            tracking_positions_x.append( x )
+            tracking_positions_y.append( y )
 
             # We are not already notified of this change
 
@@ -118,8 +157,13 @@ if __name__ == '__main__':
         # Send stats if 12 AM
         current_day =datetime.datetime.now().day
 
+        logger.debug('Current day: {}'.format(current_day))
 
         if current_day != last_day:
+
+
+            logger.debug('Making reports')
+
             last_day = current_day
 
             #Send stats

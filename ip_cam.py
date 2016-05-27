@@ -18,14 +18,16 @@ except ImportError:
 
 class IPCam():
 
-    def __init__(self,ip,debug=False):
+    def __init__(self,ip,user,password, threshold = 8, max_detection_area = 1000, debug=False):
 
         self.cam_url = 'http://{0}/'.format(ip)
         self.debug = debug
+        self.max_detection_area = max_detection_area
+        self.threshold = threshold
         # Try to connect to the cam and create the streamer
         if PYTHON2:
             password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-            password_mgr.add_password(None,self.cam_url,'admin', 'uffdr1')
+            password_mgr.add_password(None,self.cam_url, user, password )
             handler = urllib2.HTTPBasicAuthHandler(password_mgr)
             self.opener = urllib2.build_opener(handler)
         else:
@@ -148,7 +150,7 @@ class IPCam():
             frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(background))
             # threshold the delta image, dilate the thresholded image to fill
             # in holes, then find contours on thresholded image
-            thresh = cv2.threshold(frameDelta, 8 , 255, cv2.THRESH_BINARY)[1]
+            thresh = cv2.threshold(frameDelta, self.threshold , 255, cv2.THRESH_BINARY)[1]
             thresh = cv2.dilate(thresh, None, iterations=2)
             (image, contours , hierarchy) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
                                                              cv2.CHAIN_APPROX_SIMPLE)
@@ -160,7 +162,7 @@ class IPCam():
 
             for contour in contours:
                 # Ignore small contours
-                if cv2.contourArea(contour) < 1000:
+                if cv2.contourArea(contour) < self.max_detection_area:
                     continue
                 # get center of contour and append to list of contours
                 moments = cv2.moments(contour)
