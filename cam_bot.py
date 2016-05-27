@@ -58,6 +58,7 @@ if __name__ == '__main__':
     password = config_parser.get('MAIN', "Password")
     bot_token = config_parser.get('MAIN','Bot_token')
     chat_id = int(config_parser.get('MAIN','Chat_id'))
+    notify = bool(config_parser.get('MAIN','Notify'))
 
     time_between_updates = int(config_parser.get('PARAMETERS', "Time_between_updates"))
     max_detection_area = int(config_parser.get('PARAMETERS', "Max_detection_area"))
@@ -124,7 +125,7 @@ if __name__ == '__main__':
                 tracking_positions_y.append( y )
 
             # Send image
-            if last_location != last_notified_at and not already_notified and time_in_location > 10:
+            if notify and last_location != last_notified_at and not already_notified and time_in_location > 10:
                 logger.info('Sending image with Telegram bot')
                 #Send the image
                 bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_notified_at))
@@ -160,7 +161,7 @@ if __name__ == '__main__':
 
         logger.debug('Current day: {}'.format(current_day))
 
-        if current_day != last_day:
+        if notify and current_day != last_day:
 
 
             logger.debug('Making reports')

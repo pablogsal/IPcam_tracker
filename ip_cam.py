@@ -145,6 +145,9 @@ class IPCam():
         background = None
         debug = self.debug
         timer = time.time
+        counter = itertools.count()
+        n_frames = next(counter)
+
 
         for raw_frame, frame in self.video_stream(mixed=raw_frame):
 
@@ -216,3 +219,7 @@ class IPCam():
                 # if the `q` key is pressed, break from the lop
                 if key == ord("q"):
                     break
+
+            if n_frames > 2*36.000:
+                counter = itertools.count()
+                background = None
