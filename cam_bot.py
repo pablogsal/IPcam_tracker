@@ -71,7 +71,6 @@ if __name__ == '__main__':
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
-    logger.addHandler(fh)
     logger.addHandler(ch)
 
     # Prepare telegram #bot
