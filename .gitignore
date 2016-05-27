@@ -60,3 +60,9 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# Config files
+*.INI
+
+# Logs
+*.log
