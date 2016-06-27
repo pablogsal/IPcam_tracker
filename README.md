@@ -20,13 +20,17 @@ At the end of the day, it sends you a report with how long the moving object has
 
 The processing pipeline works as follows:
 
-* For each frame in the stream we first transform it to greyscale and blur it. This is because we do not want sharp areas of the image to interfer in the detection process. The bluring is achieved convoluting the image with a gaussian kernel ( technicisms are awesome! ).
+* For each frame in the stream we first transform it to greyscale and blur it. This is because we do not want sharp areas of the image to interfer in the detection process. The bluring is achieved convoluting the image with a gaussian kernel ( technicisms are awesome! ). 
 
 
 <p align="center">
 <img src="./doc/BIMO_REAL2.png">
 </p>
 
+
+<p align="center">
+<img src="./doc/BIMO_BLURED.png">
+</p>
 * We need to construct the background. We could use a static image without moving objects but that will not work because the ambient light will change among other factors. So what we do is calculate the weighted average of all the frames in the video stream as they come one by one. In this way the changing parts of the frames will be diluted in the mean and we can track all the changing properties of the static part of the image. The weight can be chosen in the configuration file.
 
 <p align="center">
