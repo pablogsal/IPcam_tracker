@@ -19,12 +19,13 @@ except ImportError:
 
 class IPCam():
 
-    def __init__(self,ip,user,password, threshold = 8, max_detection_area = 1000, debug=False):
+    def __init__(self,ip,user,password, weight = 0.5, threshold = 8, max_detection_area = 1000, debug=False):
 
         self.cam_url = 'http://{0}/'.format(ip)
         self.debug = debug
         self.max_detection_area = max_detection_area
         self.threshold = threshold
+        self.weight = weight
         # Try to connect to the cam and create the streamer
         if PYTHON2:
             password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -44,6 +45,8 @@ class IPCam():
     def test_connection(self):
         """
         Test the connection with the IP cam using a simple HTTP GET method.
+
+        :return: Boolean
         """
         try:
             simple_image_url = self.cam_url + 'image/jpeg.cgi'
@@ -178,7 +181,7 @@ class IPCam():
             # accumulate the weighted average between the current frame and
             # previous frames, then compute the difference between the current
             # frame and running average
-            cv2.accumulateWeighted(gray, background , 0.5)
+            cv2.accumulateWeighted(gray, background , self.weight )
             frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(background))
             # threshold the delta image, dilate the thresholded image to fill
             # in holes, then find contours on thresholded image
@@ -225,6 +228,7 @@ class IPCam():
                 if key == ord("q"):
                     break
 
+            # Restart the background to avoid resilence
             if n_frames > 2*36.000:
                 counter = itertools.count()
                 background = None

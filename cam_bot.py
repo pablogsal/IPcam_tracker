@@ -59,6 +59,7 @@ if __name__ == '__main__':
     bot_token = config_parser.get('MAIN','Bot_token')
     chat_id = int(config_parser.get('MAIN','Chat_id'))
     notify = bool(config_parser.get('MAIN','Notify'))
+    weight = float(config_parser.get('MAIN','Weight'))
 
     time_between_updates = int(config_parser.get('PARAMETERS', "Time_between_updates"))
     max_detection_area = int(config_parser.get('PARAMETERS', "Max_detection_area"))
@@ -81,7 +82,7 @@ if __name__ == '__main__':
     # Prepare camera
 
     camera = ip_cam.IPCam(ip,user=user,password=password,
-                          threshold = threshold,max_detection_area=max_detection_area)
+                          weight=weight,threshold = threshold,max_detection_area=max_detection_area)
 
     # Prepare arrays for stats
 
