@@ -65,7 +65,8 @@ class IPCam():
         Output: raw_image
         """
         # Get raw video stream
-        raw_byte_stream =  self.opener.open('http://192.168.1.131/video/mjpg.cgi')
+        video_stream_url = self.cam_url + 'video/mjpg.cgi'
+        raw_byte_stream =  self.opener.open( video_stream_url )
 
         # Extract frames from raw_video_stream
         count = itertools.count()
@@ -199,7 +200,7 @@ class IPCam():
                 x_means.append( int(moments['m10']/moments['m00']) )
                 y_means.append( int(moments['m01']/moments['m00']) )
 
-                # Make the mean of the contours and yield this center with the raw image
+            # Make the mean of the contours and yield this center with the raw image
             if x_means and y_means:
                 last_frame = raw_frame
                 yield Image(last_frame,(np.mean(x_means),np.mean(y_means)),timestamp)
