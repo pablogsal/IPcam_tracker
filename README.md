@@ -48,3 +48,11 @@ Oh, thank you for asking! The reporting part of the software is achieved in the 
 # THIS will work with my IP CAM?
 
 As it is probably not. But we have been clever in the design! The only thing you need to change is the IP of your camera in the configuration file and the URL where your camera dumps the video stream ( read your camera documentation for this or ask in the deep abyss that Internet is ) and you are done.
+
+# Stuff to be done
+
+* Unity Tests
+* More Unity Tests
+* Async IO
+* Deployement Stuff
+* pip install crazy-ip-tracker
