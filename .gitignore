@@ -62,7 +62,7 @@ target/
 .ipynb_checkpoints
 
 # Config files
-*.INI
+conf.INI
 
 # Logs
 *.log
