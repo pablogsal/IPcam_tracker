@@ -37,10 +37,6 @@ The processing pipeline works as follows:
 <img src="./doc/BIMO_BACKGROUND.png">
 </p>
 
-The formula for the background image is:
-
-new_median = (1-p) * ( old_median) + p * new_image, where p in [0,1]
-
 * When we have added the image to our background we calculate the difference between our frame and this background. This can have a lot of noise ( a lot of little parts of the image will change ) so in order to clean this differenced image we will choose only the pixels that have at least certain threshold that can be chosen in the configuration file. Then we dilate this thresholded image to maximize the deletion and remove sharp edges.
 
 <p align="center">
