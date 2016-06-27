@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./doc/animation.gif">
+<img src="./doc/animation2.gif">
 </p>
 
 # What is THIS?
