@@ -53,7 +53,11 @@ class IPCam():
             return False
 
     def get_simple_frame(self):
+        """
+        Get a simple image from the IP camera.
 
+        :return: A bytes object representing the single image
+        """
         simple_image_url = self.cam_url + 'image/jpeg.cgi'
         simple_image = self.opener.open( simple_image_url )
         return simple_image.read()
@@ -62,7 +66,7 @@ class IPCam():
         """
         Get a generator that yields raw images (in byte format) from the IP Cam in real time.
 
-        Output: raw_image
+        :return: A generator of bytes objects representing raw_images.
         """
         # Get raw video stream
         video_stream_url = self.cam_url + 'video/mjpg.cgi'
@@ -79,8 +83,6 @@ class IPCam():
                     print('Frame recieved. Start Transformation')
                 a = byte_stream.find('\xff\xd8')
                 b = byte_stream.find('\xff\xd9')
-
-                print(a,b)
 
                 if fails > 10:
                     raise ValueError('10 fails locating b')
@@ -100,8 +102,6 @@ class IPCam():
                 a = byte_stream.find(b'\xff\xd8')
                 b = byte_stream.find(b'\xff\xd9')
 
-                print(a,b)
-
                 if fails > 10:
                     raise ValueError('10 fails locating b')
 
@@ -118,7 +118,9 @@ class IPCam():
 
         If mixed is True, also yields the raw image that was used to generate the numpy array.
 
-        Output: raw_image, numpy_array
+        :param mixed: Boolean
+        :return: A generator of tuples of the form (raw_frame, 2Darray) where raw_image is a
+                 image object and 2Darray is the 2D numpy array of the image.
 
         Note: If mixed = False then raw_image = None.
         """
@@ -130,7 +132,7 @@ class IPCam():
             for raw_frame in self.raw_video_stream():
                 yield None, cv2.imdecode(np.fromstring(raw_frame, dtype=np.uint8),cv2.IMREAD_COLOR)
 
-    def motion_detector_steamer(self, raw_frame = True, view_stream = False):
+    def motion_detector_steamer(self, get_raw_frame = True, view_stream = False):
         """
         Get a generator that yields the centroid of the moving objects from the IP Cam in real time.
 
@@ -138,7 +140,10 @@ class IPCam():
 
         If view_stream is True then a window is open for visualizing the process.
 
-        Output: raw_frame, centroid
+        :param get_raw_frame: Boolean
+        :param view_stream: Boolean
+        :returns: A generator of tuples of the form (raw_frame, centroid) where centroid is a tuple
+                  of ints and raw_frame is a numpy array.
 
         Note: centroid is None if no motion is detected.
         Note: raw_frame is always the last frame with detection or the first frame if no motion has been detected yet.
@@ -149,8 +154,7 @@ class IPCam():
         counter = itertools.count()
         n_frames = next(counter)
 
-
-        for raw_frame, frame in self.video_stream(mixed=raw_frame):
+        for raw_frame, frame in self.video_stream(mixed=get_raw_frame):
 
             start_timer = timer()
 

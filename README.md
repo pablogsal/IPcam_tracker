@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./doc/BIMO_REAL.png">
+<img src="./doc/animation.gif">
 </p>
 
 # What is THIS?
