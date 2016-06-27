@@ -1,6 +1,6 @@
-<div style="text-align:center">
-![alt text](./doc/BIMO_REAL.png?raw=true "Polarization map")
-</div>
+<p align="center">
+<img src="./doc/BIMO_REAL.png">
+</p>
 
 # What is THIS?
 
@@ -22,21 +22,22 @@ The processing pipeline works as follows:
 
 * For each frame in the stream we first transform it to greyscale and blur it. This is because we do not want sharp areas of the image to interfer in the detection process. The bluring is achieved convoluting the image with a gaussian kernel ( technicisms are awesome! ).
 
-<div style="text-align:center">
-![alt text](./doc/BIMO_REAL2.png?raw=true "Polarization map")
-</div>
+
+<p align="center">
+<img src="./doc/BIMO_REAL2.png">
+</p>
 
 * We need to construct the background. We could use a static image without moving objects but that will not work because the ambient light will change among other factors. So what we do is calculate the weighted average of all the frames in the video stream as they come one by one. In this way the changing parts of the frames will be diluted in the mean and we can track all the changing properties of the static part of the image. The weight can be chosen in the configuration file.
 
-<div style="text-align:center">
-![Image background](./doc/BIMO_BACKGROUND.png?raw=true "Image background")
-</div>
+<p align="center">
+<img src="./doc/BIMO_BACKGROUND.png">
+</p>
 
 * When we have added the image to our background we calculate the difference between our frame and this background. This can have a lot of noise ( a lot of little parts of the image will change ) so in order to clean this differenced image we will choose only the pixels that have at least certain threshold that can be chosen in the configuration file. Then we dilate this thresholded image to maximize the deletion and remove sharp edges.
 
-<div style="text-align:center">
-![Image background](./doc/BIMO_THRESHOLD2.png?raw=true "Image difference")
-</div>
+<p align="center">
+<img src="./doc/BIMO_THRESHOLD2.png">
+</p>
 
 * Finally in this thresholded image we calculate the centroid of the detected pixel to have some sort of "moving object position" and we yield the centroid coordinates.
 
