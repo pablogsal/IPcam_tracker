@@ -4,7 +4,7 @@
 
 # What is THIS?
 
-This is a IP-CAM tracker. I use it to track the movement and behaviour of my cat (his name is BMO - as in Adventure Time ). I love cats and I love gathering statistics and controlling stuff so I joined the best of the two worlds.... In Python!
+This is an IP-CAM tracker. I use it to track the movement and behaviour of my cat (his name is BMO - as in Adventure Time ). I love cats and I love gathering statistics and controlling stuff so I joined the best of the two worlds.... In Python!
 
 Note: You can track whatever thing that moves, not only cats.
 
@@ -58,5 +58,5 @@ As it is probably not. But we have been clever in the design! The only thing you
 * Unity Tests
 * More Unity Tests
 * Async IO
-* Deployement Stuff
+* Deployment Stuff
 * pip install crazy-ip-tracker
