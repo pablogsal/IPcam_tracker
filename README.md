@@ -31,13 +31,13 @@ The processing pipeline works as follows:
 <p align="center">
 <img src="./doc/BIMO_BLURED.png">
 </p>
-* We need to construct the background. We could use a static image without moving objects but that will not work because the ambient light will change among other factors. So what we do is calculate the weighted average of all the frames in the video stream as they come one by one. In this way the changing parts of the frames will be diluted in the mean and we can track all the changing properties of the static part of the image. The weight can be chosen in the configuration file.
+* We need to construct the background. We could use a static image without moving objects but that will not work because the ambient light will change among other factors. So what we do is calculate the weighted average of all the frames in the video stream as they come one by one. In this way the changing parts of the frames will be diluted in the average and we can track all the changing properties of the static part of the image. The weight can be chosen in the configuration file.
 
 <p align="center">
 <img src="./doc/BIMO_BACKGROUND.png">
 </p>
 
-* When we have added the image to our background we calculate the difference between our frame and this background. This can have a lot of noise ( a lot of little parts of the image will change ) so in order to clean this differenced image we will choose only the pixels that have at least certain threshold that can be chosen in the configuration file. Then we dilate this thresholded image to maximize the deletion and remove sharp edges.
+* When we have added the image to our background we calculate the difference between our frame and this background. This can have a lot of noise ( a lot of little parts of the image will change ) so in order to clean this differenced image we will binarize the image choosing only the pixels that have at least certain threshold that can be adjusted in the configuration file. Then we dilate this thresholded image to maximize the deletion and remove sharp edges.
 
 <p align="center">
 <img src="./doc/BIMO_THRESHOLD2.png">
@@ -55,8 +55,8 @@ As it is probably not. But we have been clever in the design! The only thing you
 
 # Stuff to be done
 
-* Unity Tests
-* More Unity Tests
+* Unit Tests
+* More Unit Tests
 * Async IO
 * Deployment Stuff
 * pip install crazy-ip-tracker
