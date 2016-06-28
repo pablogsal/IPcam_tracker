@@ -2,11 +2,24 @@ import io
 import numpy as np
 import matplotlib.pyplot as plt
 def serialize_image( image ):
+    """
+    Returns a serialized version of an image in bytes format.
+
+    :image: A bytes object representing an image.
+    :returns: A io serialized object representing the image.
+    """
 
     return io.BufferedReader(io.BytesIO(image))
 
 def make_heat_map( x_list, y_list):
+    """
+    Creates a heat map in the current location as "heat_map.png" when provided
+    with the x_list and y_list coordinates of points.
 
+    :x_list: List of ints ( x coordinates of points )
+    :y_list: List of ints ( y coordinates of points )
+    :returns: None
+    """
     x = np.array(x_list)
     y = np.array(y_list)
 
@@ -19,6 +32,12 @@ def make_heat_map( x_list, y_list):
     plt.close()    # close the figure
 
 def room_location( center ):
+    """
+    Translates from (x,y) coordinates into named places.
+
+    :center: Tuple of ints (representing the detection point).
+    :returns: String (with the named place of the detection point).
+    """
 
     if not center:
         return None
