@@ -20,7 +20,19 @@ except ImportError:
 class IPCam():
 
     def __init__(self,ip,user,password, weight = 0.5, threshold = 8, max_detection_area = 1000, debug=False):
+        """
+        Instantiate a object of the class IP_CAM.
 
+        :param ip: String representing the camera IP
+        :param user: String with the camera username
+        :param password: String with the camera password
+        :param weight: float in [0,1] representing the weight when performing the mean of the background.
+        :param threshold: int representing the minimum pixel value to detect when substracting each image from the background.
+        :param max_detection_area: int max area of the bigger rectangle to consider detection.
+                                   This avoid detection of very big objects (passing people).
+        :param debug: Boolean (print debug messages).
+
+        """
         self.cam_url = 'http://{0}/'.format(ip)
         self.debug = debug
         self.max_detection_area = max_detection_area
