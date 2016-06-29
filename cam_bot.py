@@ -203,5 +203,6 @@ if __name__ == '__main__':
                 bot.sendPhoto(chat_id=chat_id,photo = heat_map)
 
             # Reset stats
-            tracking_positions = []
+            tracking_positions_x= []
+            tracking_positions_y= []
             positions_timer = collections.Counter()

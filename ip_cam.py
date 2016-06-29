@@ -92,8 +92,8 @@ class RawIPCamera():
                 a = byte_stream.find('\xff\xd8')
                 b = byte_stream.find('\xff\xd9')
 
-                if fails > 10:
-                    raise ValueError('10 fails locating b')
+                if fails > 100:
+                    raise ValueError('100 fails locating b')
 
                 if a!=-1 and b!=-1:
                     raw_image = byte_stream[a:b+2]
@@ -110,8 +110,8 @@ class RawIPCamera():
                 a = byte_stream.find(b'\xff\xd8')
                 b = byte_stream.find(b'\xff\xd9')
 
-                if fails > 10:
-                    raise ValueError('10 fails locating b')
+                if fails > 100:
+                    raise ValueError('100 fails locating b')
 
                 if a!=-1 and b!=-1:
                     raw_image = byte_stream[a:b+2]
