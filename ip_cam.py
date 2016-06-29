@@ -5,7 +5,7 @@ import datetime
 import time
 import itertools
 
-Image = collections.namedtuple("Image","raw_image detection_center timestamp")
+DetectionImage = collections.namedtuple("DetectionImage","raw_image image detection_center timestamp")
 
 try:
     import urllib.request as urllib
@@ -17,27 +17,20 @@ except ImportError:
     import urllib2 as url_error
     PYTHON2 = True
 
-class IPCam():
+class RawIPCamera():
 
-    def __init__(self,ip,user,password, weight = 0.5, threshold = 8, max_detection_area = 1000, debug=False):
+    def __init__(self,ip,user,password,debug=False):
         """
         Instantiate a object of the class IP_CAM.
 
         :param ip: String representing the camera IP
         :param user: String with the camera username
         :param password: String with the camera password
-        :param weight: float in [0,1] representing the weight when performing the mean of the background.
-        :param threshold: int representing the minimum pixel value to detect when substracting each image from the background.
-        :param max_detection_area: int max area of the bigger rectangle to consider detection.
-                                   This avoid detection of very big objects (passing people).
         :param debug: Boolean (print debug messages).
 
         """
         self.cam_url = 'http://{0}/'.format(ip)
         self.debug = debug
-        self.max_detection_area = max_detection_area
-        self.threshold = threshold
-        self.weight = weight
         # Try to connect to the cam and create the streamer
         if PYTHON2:
             password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -127,7 +120,7 @@ class IPCam():
                 else:
                     fails = next(count)
 
-    def video_stream(self,mixed = False):
+    def video_stream(self,get_raw_frame = True):
         """
         Get a generator that yields images as numpy arrays from the IP Cam in real time.
 
@@ -140,14 +133,17 @@ class IPCam():
         Note: If mixed = False then raw_image = None.
         """
 
-        if mixed:
+        if get_raw_frame:
             for raw_frame in self.raw_video_stream():
                 yield raw_frame, cv2.imdecode(np.fromstring(raw_frame, dtype=np.uint8),cv2.IMREAD_COLOR)
         else:
             for raw_frame in self.raw_video_stream():
-                yield None, cv2.imdecode(np.fromstring(raw_frame, dtype=np.uint8),cv2.IMREAD_COLOR)
+                yield cv2.imdecode(np.fromstring(raw_frame, dtype=np.uint8),cv2.IMREAD_COLOR)
 
-    def motion_detector_steamer(self, get_raw_frame = True, view_stream = False):
+
+
+
+def motion_detector_steamer(video_stream, weight , threshold , max_detection_area , get_raw_frame, debug = False):
         """
         Get a generator that yields the centroid of the moving objects from the IP Cam in real time.
 
@@ -155,6 +151,11 @@ class IPCam():
 
         If view_stream is True then a window is open for visualizing the process.
 
+        :param video_stream: A generator of numpy arrays representing the images to process.
+        :param weight: float in [0,1] representing the weight when performing the mean of the background.
+        :param threshold: int representing the minimum pixel value to detect when substracting each image from the background.
+        :param max_detection_area: int max area of the bigger rectangle to consider detection.
+                   This avoid detection of very big objects (passing people).
         :param get_raw_frame: Boolean
         :param view_stream: Boolean
         :returns: A generator of tuples of the form (raw_frame, centroid) where centroid is a tuple
@@ -164,16 +165,15 @@ class IPCam():
         Note: raw_frame is always the last frame with detection or the first frame if no motion has been detected yet.
         """
         background = None
-        debug = self.debug
         timer = time.time
         counter = itertools.count()
         n_frames = next(counter)
 
-        for raw_frame, frame in self.video_stream(mixed=get_raw_frame):
+        for raw_frame, frame in video_stream:
 
             start_timer = timer()
 
-            if self.debug:
+            if debug:
                 print('Start Computation')
             # Get timestamp
 
@@ -193,26 +193,26 @@ class IPCam():
             # accumulate the weighted average between the current frame and
             # previous frames, then compute the difference between the current
             # frame and running average
-            cv2.accumulateWeighted(gray, background , self.weight )
+            cv2.accumulateWeighted(gray, background , weight )
             frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(background))
+
             # threshold the delta image, dilate the thresholded image to fill
             # in holes, then find contours on thresholded image
-            thresh = cv2.threshold(frameDelta, self.threshold , 255, cv2.THRESH_BINARY)[1]
+            thresh = cv2.threshold(frameDelta, threshold , 255, cv2.THRESH_BINARY)[1]
             thresh = cv2.dilate(thresh, None, iterations=2)
             (image, contours , hierarchy) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
                                                              cv2.CHAIN_APPROX_SIMPLE)
 
             # Prepare list of centers for x and y
-
             x_means = []
             y_means = []
 
-            if self.debug:
+            if debug:
                 print('Detecting contours')
 
             for contour in contours:
                 # Ignore small contours
-                if cv2.contourArea(contour) < self.max_detection_area:
+                if cv2.contourArea(contour) < max_detection_area:
                     continue
                 # get center of contour and append to list of contours
                 moments = cv2.moments(contour)
@@ -222,25 +222,48 @@ class IPCam():
             # Make the mean of the contours and yield this center with the raw image
             if x_means and y_means:
                 last_frame = raw_frame
-                yield Image(last_frame,(np.mean(x_means),np.mean(y_means)),timestamp)
+                yield DetectionImage(last_frame,frame,(np.mean(x_means),np.mean(y_means)),timestamp)
 
-                # Add circle if view_stream is True
-                if view_stream:
-                    cv2.circle(frame, (int(np.mean(x_means)),int(np.mean(y_means))),15, (0, 255, 0))
+                # Add circle to the image to mark the detection
+                cv2.circle(frame, (int(np.mean(x_means)),int(np.mean(y_means))),15, (0, 255, 0))
+
             else:
-                yield Image(last_frame,None,timestamp)
+                yield DetectionImage(last_frame,frame,None,timestamp)
             if debug:
                 print("Frame computed in {} seconds".format(timer() - start_timer))
 
-
-            if view_stream:
-                cv2.imshow("Feed",frame)
-                key = cv2.waitKey(1) & 0xFF
-                # if the `q` key is pressed, break from the lop
-                if key == ord("q"):
-                    break
 
             # Restart the background to avoid resilence
             if n_frames > 2*36.000:
                 counter = itertools.count()
                 background = None
+
+
+
+class MotionDetectorCamera(RawIPCamera):
+
+    def motion_detected_video_stream(self, weight = 0.5, threshold = 8,
+                                          max_detection_area = 1000, get_raw_frame = True,
+                                          view_stream = False, debug = False):
+
+        # Configure and get the motion detector generator
+
+        motion_detector_generator = motion_detector_steamer(self.video_stream(get_raw_frame), weight , threshold
+                                                            , max_detection_area , get_raw_frame
+                                                            , debug = False)
+
+        # Yield the detected images and show them if needed
+
+        for detected_image in motion_detector_generator:
+
+            if view_stream:
+                cv2.imshow("Feed",detected_image.image)
+                key = cv2.waitKey(1) & 0xFF
+                # if the `q` key is pressed, break from the lop
+                if key == ord("q"):
+                    break
+
+            yield detected_image
+
+
+

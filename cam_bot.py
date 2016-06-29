@@ -100,8 +100,7 @@ if __name__ == '__main__':
 
     # Prepare camera
 
-    camera = ip_cam.IPCam(ip,user=user,password=password,
-                          weight=weight,threshold = threshold,max_detection_area=max_detection_area)
+    camera = ip_cam.MotionDetectorCamera(ip,user=user,password=password)
 
     # Prepare arrays for stats
 
@@ -122,7 +121,9 @@ if __name__ == '__main__':
     already_notified = False
     last_notified_at = None
 
-    for frame in camera.motion_detector_steamer(view_stream = True):
+    for frame in camera.motion_detected_video_stream(weight=weight,threshold = threshold,
+                                                      max_detection_area=max_detection_area,
+                                                      view_stream=True):
 
         room_position = room_location(frame.detection_center)
 
