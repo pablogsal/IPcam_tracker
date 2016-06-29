@@ -158,6 +158,7 @@ if __name__ == '__main__':
                 send_image_with_bot(chat_id,frame)
                 last_notified_at = last_location
                 already_notified = True
+
         # If we have changed location
         else:
 

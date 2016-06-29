@@ -149,15 +149,12 @@ def motion_detector_steamer(video_stream, weight , threshold , max_detection_are
 
         If raw_frame is True then also yields the raw_image used for the calculation.
 
-        If view_stream is True then a window is open for visualizing the process.
-
         :param video_stream: A generator of numpy arrays representing the images to process.
         :param weight: float in [0,1] representing the weight when performing the mean of the background.
         :param threshold: int representing the minimum pixel value to detect when substracting each image from the background.
         :param max_detection_area: int max area of the bigger rectangle to consider detection.
                    This avoid detection of very big objects (passing people).
         :param get_raw_frame: Boolean
-        :param view_stream: Boolean
         :returns: A generator of tuples of the form (raw_frame, centroid) where centroid is a tuple
                   of ints and raw_frame is a numpy array.
 
@@ -244,10 +241,25 @@ def motion_detector_steamer(video_stream, weight , threshold , max_detection_are
 
 class MotionDetectorCamera(RawIPCamera):
 
-    def motion_detected_video_stream(self, weight = 0.5, threshold = 8,
+    def motion_detected_video_stream(self, *, weight = 0.5, threshold = 8,
                                           max_detection_area = 1000, get_raw_frame = True,
                                           view_stream = False, debug = False):
+        """
+        This method prepares the motion_detector_generator and starts yielding detected images from it.
+        If view_stream is True then a window is open for visualizing the process.
 
+        :param weight: float in [0,1] representing the weight when performing the mean of the background.
+        :param threshold: int representing the minimum pixel value to detect when substracting each image from the background.
+        :param max_detection_area: int max area of the bigger rectangle to consider detection.
+                   This avoid detection of very big objects (passing people).
+        :param get_raw_frame: Boolean
+        :param view_stream: Boolean
+        :returns: A generator of tuples of the form (raw_frame, centroid) where centroid is a tuple
+                  of ints and raw_frame is a numpy array.
+
+        Note: centroid is None if no motion is detected.
+        Note: raw_frame is always the last frame with detection or the first frame if no motion has been detected yet.
+        """
         # Configure and get the motion detector generator
 
         motion_detector_generator = motion_detector_steamer(self.video_stream(get_raw_frame), weight , threshold
