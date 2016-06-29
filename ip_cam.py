@@ -222,10 +222,12 @@ def motion_detector_steamer(video_stream, weight , threshold , max_detection_are
             # Make the mean of the contours and yield this center with the raw image
             if x_means and y_means:
                 last_frame = raw_frame
-                yield DetectionImage(last_frame,frame,(np.mean(x_means),np.mean(y_means)),timestamp)
 
                 # Add circle to the image to mark the detection
                 cv2.circle(frame, (int(np.mean(x_means)),int(np.mean(y_means))),15, (0, 255, 0))
+
+                yield DetectionImage(last_frame,frame,(np.mean(x_means),np.mean(y_means)),timestamp)
+
 
             else:
                 yield DetectionImage(last_frame,frame,None,timestamp)

@@ -57,6 +57,11 @@ def room_location( center ):
     else:
         return "En el suelo / Unknown "
 
+def send_image_with_bot(chat_id,frame):
+
+    bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_notified_at))
+    bot.sendPhoto(chat_id=chat_id, photo = serialize_image(frame.raw_image),caption=last_location)
+
 if __name__ == '__main__':
     import ip_cam
     import telegram
@@ -121,9 +126,11 @@ if __name__ == '__main__':
     already_notified = False
     last_notified_at = None
 
-    for frame in camera.motion_detected_video_stream(weight=weight,threshold = threshold,
+    motion_detector_stream = camera.motion_detected_video_stream(weight=weight,threshold = threshold,
                                                       max_detection_area=max_detection_area,
-                                                      view_stream=True):
+                                                      view_stream=True)
+
+    for frame in motion_detector_stream:
 
         room_position = room_location(frame.detection_center)
 
@@ -148,12 +155,9 @@ if __name__ == '__main__':
             # Send image
             if notify and last_location != last_notified_at and not already_notified and time_in_location > 10:
                 logger.info('Sending image with Telegram bot')
-                #Send the image
-                bot.sendMessage(chat_id = chat_id, text="I have spend {} seconds in {}".format(time_in_location,last_notified_at))
-                bot.sendPhoto(chat_id=chat_id, photo = serialize_image(frame.raw_image),caption=last_location)
+                send_image_with_bot(chat_id,frame)
                 last_notified_at = last_location
                 already_notified = True
-
         # If we have changed location
         else:
 
